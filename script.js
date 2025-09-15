@@ -552,8 +552,6 @@ function checkConnectionStatus(peerConnection, userId) {
     };
 }
 
-// Call this after creating each peer connection
-checkConnectionStatus(peerConnection, userId);
 
 // Generate a random room ID
 function generateRoomId() {
