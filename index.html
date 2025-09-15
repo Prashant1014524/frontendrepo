@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoCall - WebRTC Video Conference</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-video"></i>
+                <span>VideoCall</span>
+            </div>
+            <div class="room-info" id="roomInfo">
+                <span id="roomIdDisplay">Not in a room</span>
+                <button id="copyRoomIdBtn"><i class="fas fa-copy"></i></button>
+            </div>
+        </header>
+        
+        <div class="setup-screen" id="setupScreen">
+            <div class="setup-container">
+                <h2>Start or Join a Video Call</h2>
+                <div class="input-group">
+                    <label for="roomIdInput">Room ID:</label>
+                    <input type="text" id="roomIdInput" placeholder="Enter room ID or leave empty to create new">
+                </div>
+                <div class="input-group">
+                    <label for="userNameInput">Your Name:</label>
+                    <input type="text" id="userNameInput" placeholder="Enter your name">
+                </div>
+                <button id="joinBtn" class="join-button">Join Room</button>
+                <p class="info-text">Share the Room ID with others to invite them to your call</p>
+            </div>
+        </div>
+        
+        <div class="main-content hidden" id="mainContent">
+            <div class="video-container">
+                <div class="participants" id="participants">
+                    <!-- Video elements will be added here dynamically -->
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn mute" id="muteBtn" title="Mute">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="control-btn video" id="videoBtn" title="Video">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="control-btn screen-share" id="screenShareBtn" title="Share Screen">
+                        <i class="fas fa-desktop"></i>
+                    </button>
+                    <button class="control-btn hangup" id="hangupBtn" title="Hang Up">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h2>Participants (<span id="participantCount">1</span>)</h2>
+                    <ul class="participant-list" id="participantList">
+                        <!-- Participants will be added here dynamically -->
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section chat-container">
+                    <h2>Chat</h2>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will be added here dynamically -->
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="messageInput" placeholder="Type a message...">
+                        <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
