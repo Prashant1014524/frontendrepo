@@ -127,30 +127,14 @@ async function joinRoom() {
 function createPeerConnection(userId, isInitiator) {
     const peerConnection = new RTCPeerConnection({
         iceServers: [
-            // Google STUN servers
+            // Free STUN servers
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
             { urls: 'stun:stun2.l.google.com:19302' },
             { urls: 'stun:stun3.l.google.com:19302' },
             { urls: 'stun:stun4.l.google.com:19302' },
             
-            // Additional STUN servers
-            { urls: 'stun:stun.services.mozilla.com:3478' },
-            { urls: 'stun:stun.xten.com:3478' },
-            
-            // Premium TURN servers (more reliable)
-            {
-                urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-                username: 'YOUR_TWILIO_USERNAME', // You need to sign up for Twilio
-                credential: 'YOUR_TWILIO_CREDENTIAL'
-            },
-            {
-                urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-                username: 'YOUR_TWILIO_USERNAME',
-                credential: 'YOUR_TWILIO_CREDENTIAL'
-            },
-            
-            // Free TURN servers (backup)*
+            // Free TURN servers (critical for cross-network connections)
             { 
                 urls: 'turn:openrelay.metered.ca:80',
                 username: 'openrelayproject',
@@ -165,12 +149,16 @@ function createPeerConnection(userId, isInitiator) {
                 urls: 'turn:openrelay.metered.ca:443?transport=tcp',
                 username: 'openrelayproject',
                 credential: 'openrelayproject'
+            },
+            // Backup TURN servers
+            {
+                urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                username: 'webrtc',
+                credential: 'webrtc'
             }
         ],
-        iceTransportPolicy: 'relay', // Force TURN usage for better reliability
-        iceCandidatePoolSize: 10
+        iceTransportPolicy: 'all' // Use both UDP and TCP
     });
-    
     // Add this function to monitor WebRTC statistics
     function monitorConnection(peerConnection, userId) {
         setInterval(async () => {
