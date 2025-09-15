@@ -127,10 +127,69 @@ async function joinRoom() {
 function createPeerConnection(userId, isInitiator) {
     const peerConnection = new RTCPeerConnection({
         iceServers: [
+            // Free STUN servers
             { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            
+            // Free TURN servers (critical for cross-network connections)
+            { 
+                urls: 'turn:openrelay.metered.ca:80',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            { 
+                urls: 'turn:openrelay.metered.ca:443',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            { 
+                urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                username: 'openrelayproject',
+                credential: 'openrelayproject'
+            },
+            // Backup TURN servers
+            {
+                urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                username: 'webrtc',
+                credential: 'webrtc'
+            }
+        ],
+        iceTransportPolicy: 'all' // Use both UDP and TCP
     });
+    // Add this function to monitor WebRTC statistics
+    function monitorConnection(peerConnection, userId) {
+        setInterval(async () => {
+            try {
+                const stats = await peerConnection.getStats();
+                stats.forEach(report => {
+                    if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        console.log(`Connection established for ${userId} using:`, 
+                                report.localCandidateId.includes('relay') ? 'TURN relay' : 'direct connection');
+                    }
+                });
+            } catch (error) {
+                console.log('Error getting stats for', userId, error);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+
+// Call this after creating each peer connection
+// monitorConnection(peerConnection, userId);
+    
+    // Add connection state monitoring
+    peerConnection.oniceconnectionstatechange = () => {
+        console.log(`ICE connection state for ${userId}:`, peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === 'failed') {
+            console.log('ICE connection failed, may need TURN server');
+        }
+    };
+    
+    peerConnection.onconnectionstatechange = () => {
+        console.log(`Connection state for ${userId}:`, peerConnection.connectionState);
+    };
     
     // Add local stream to peer connection
     if (localStream) {
@@ -141,6 +200,7 @@ function createPeerConnection(userId, isInitiator) {
     
     // Handle remote stream
     peerConnection.ontrack = (event) => {
+        console.log('Received remote stream for:', userId);
         const remoteStream = event.streams[0];
         createVideoElement(userId, remoteStream);
     };
@@ -153,14 +213,23 @@ function createPeerConnection(userId, isInitiator) {
                 candidate: event.candidate,
                 sender: socket.id
             });
+        } else {
+            console.log('ICE gathering complete for:', userId);
         }
+    };
+    
+    // Handle negotiation needed event
+    peerConnection.onnegotiationneeded = () => {
+        console.log('Negotiation needed for:', userId);
     };
     
     peers[userId] = peerConnection;
     
     // Create offer if initiator
     if (isInitiator) {
-        createOffer(userId);
+        setTimeout(() => {
+            createOffer(userId);
+        }, 1000); // Small delay to ensure everything is ready
     }
     
     return peerConnection;
@@ -468,6 +537,23 @@ function copyRoomId() {
         }, 2000);
     });
 }
+// Add this function to check connection status
+function checkConnectionStatus(peerConnection, userId) {
+    peerConnection.oniceconnectionstatechange = () => {
+        console.log(`ICE connection state for ${userId}:`, peerConnection.iceConnectionState);
+    };
+    
+    peerConnection.onconnectionstatechange = () => {
+        console.log(`Connection state for ${userId}:`, peerConnection.connectionState);
+    };
+    
+    peerConnection.onicegatheringstatechange = () => {
+        console.log(`ICE gathering state for ${userId}:`, peerConnection.iceGatheringState);
+    };
+}
+
+// Call this after creating each peer connection
+checkConnectionStatus(peerConnection, userId);
 
 // Generate a random room ID
 function generateRoomId() {
