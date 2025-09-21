@@ -45,11 +45,13 @@ function init() {
     hangupBtn.addEventListener('click', leaveRoom);
     
     // Initialize Socket.io
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        socket = io(); // Connect to local server in development
-    } else {
-        socket = io('https://web-production-cc36.up.railway.app'); // Connect to your Railway server
-    }
+  // Initialize Socket.io
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    socket = io(); // Connect to local server in development
+} else {
+    socket = io(process.env.NEXT_PUBLIC_BACKEND_URL); // Connect to Railway using environment variable
+}
+
     setupSocketListeners();
 }
 
