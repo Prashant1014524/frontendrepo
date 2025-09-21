@@ -49,7 +49,7 @@ function init() {
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     socket = io(); // Connect to local server in development
 } else {
-    socket = io(process.env.NEXT_PUBLIC_BACKEND_URL); // Connect to Railway using environment variable
+    socket = io('https://web-production-e8f6.up.railway.app'); // Connect to Railway using environment variable
 }
 
     setupSocketListeners();
